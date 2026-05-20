@@ -1,71 +1,23 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref } from 'vue'
 
-const utilizadores = ref<any[]>([])
-const posts = ref<any[]>([])
-const loading = ref(true)
-const error = ref('')
-const openDropdown = ref<number | null>(null)
-const UtilizadorPosts = ref<any[]>([])
-
-onMounted(async () => {
-  try {
-    const response = await axios.get('http://localhost:8000/utilizadores')
-    utilizadores.value = response.data
-    error.value = ''
-  } catch (err: any) {
-    error.value = err.message || 'Erro ao carregar utilizadores'
-    console.error(err)
-  } finally {
-    loading.value = false
-  }
-})
-
-
-const viewPosts = async (userId: number) => {
-  try {
-    const response = await axios.get(`http://localhost:8000/posts/${userId}`)
-    UtilizadorPosts.value = response.data
-    console.log(`Posts do utilizador ${userId}:`, response.data)
-  } catch (err: any) {
-    console.error(`Erro ao carregar posts do utilizador ${userId}:`, err.message)
-  }
-  openDropdown.value = null
-}
+const drawer = ref(false)
 </script>
 
 <template>
-  <div id="app">
-    <h1>Lista de Utilizadores</h1>
-    
-    <div v-if="loading" class="loading">Carregando...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-    <div v-else-if="utilizadores.length > 0">
-      <ul>
-        <li v-for="utilizador in utilizadores" :key="utilizador.id" class="user-item">
-          <div class="user-info">
-            <span>{{ utilizador.name }} (@{{ utilizador.username }})</span>
-            <div>
-                <button @click="viewPosts(utilizador.id)">Ver Posts</button>
-            </div>
-          </div>
-        </li>
-      </ul>
+  <v-app>
+    <v-app-bar color="primary">
+      <v-app-bar-nav-icon @click="drawer = !drawer" style="color: white;"></v-app-bar-nav-icon>
+      <v-app-bar-title>Aplicação</v-app-bar-title>
+      <v-spacer></v-spacer>
+      <v-btn variant="text" to="/">Home</v-btn>
+      <v-btn variant="text" to="/leitor">Leitor</v-btn>
+    </v-app-bar>
 
-      
-      <div v-if="UtilizadorPosts.length > 0" class="posts-section">
-        <h2>Posts do Utilizador:</h2>
-        <ul>
-          <li v-for="post in UtilizadorPosts" :key="post.id" class="post-item">
-            {{ post.content }}
-          </li>
-        </ul>
-      </div>
-      <div v-else-if="UtilizadorPosts.length === 0"><h2>Sem posts para este utilizador</h2></div>
-    </div>
-    <div v-else class="empty">Sem utilizadores</div>
-  </div>
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
 </template>
 
 <style scoped>
