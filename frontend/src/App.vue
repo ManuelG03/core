@@ -1,48 +1,75 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-const username = ref('')
-const users = ref<string[]>([])
+const utilizadores = ref<any[]>([])
+const posts = ref<any[]>([])
+const loading = ref(true)
+const error = ref('')
+const openDropdown = ref<number | null>(null)
+const UtilizadorPosts = ref<any[]>([])
 
-const addUser = () => {
-  if (username.value.trim()) {
-    users.value.push(username.value)
-    username.value = ''
+onMounted(async () => {
+  try {
+    const response = await axios.get('http://localhost:8000/utilizadores')
+    utilizadores.value = response.data
+    error.value = ''
+  } catch (err: any) {
+    error.value = err.message || 'Erro ao carregar utilizadores'
+    console.error(err)
+  } finally {
+    loading.value = false
   }
-}
+})
 
-const handleKeypress = (e: KeyboardEvent) => {
-  if (e.key === 'Enter') {
-    addUser()
+
+const viewPosts = async (userId: number) => {
+  try {
+    const response = await axios.get(`http://localhost:8000/posts/${userId}`)
+    UtilizadorPosts.value = response.data
+    console.log(`Posts do utilizador ${userId}:`, response.data)
+  } catch (err: any) {
+    console.error(`Erro ao carregar posts do utilizador ${userId}:`, err.message)
   }
+  openDropdown.value = null
 }
 </script>
 
 <template>
-  <div class="container">
-    <h1>Gestão de Utilizadores</h1>
+  <div id="app">
+    <h1>Lista de Utilizadores</h1>
     
-    <div class="input-group">
-      <input 
-        v-model="username" 
-        type="text" 
-        placeholder="Insira o nome de utilizador"
-        @keypress="handleKeypress"
-      />
-      <button @click="addUser">Inserir</button>
-    </div>
-
-    <div v-if="users.length > 0" class="users-list">
-      <h2>Utilizadores Adicionados:</h2>
+    <div v-if="loading" class="loading">Carregando...</div>
+    <div v-else-if="error" class="error">{{ error }}</div>
+    <div v-else-if="utilizadores.length > 0">
       <ul>
-        <li v-for="(user, index) in users" :key="index">{{ user }}</li>
+        <li v-for="utilizador in utilizadores" :key="utilizador.id" class="user-item">
+          <div class="user-info">
+            <span>{{ utilizador.name }} (@{{ utilizador.username }})</span>
+            <div>
+                <button @click="viewPosts(utilizador.id)">Ver Posts</button>
+            </div>
+          </div>
+        </li>
       </ul>
+
+      
+      <div v-if="UtilizadorPosts.length > 0" class="posts-section">
+        <h2>Posts do Utilizador:</h2>
+        <ul>
+          <li v-for="post in UtilizadorPosts" :key="post.id" class="post-item">
+            {{ post.content }}
+          </li>
+        </ul>
+      </div>
+      <div v-else-if="UtilizadorPosts.length === 0"><h2>Sem posts para este utilizador</h2></div>
     </div>
+    <div v-else class="empty">Sem utilizadores</div>
   </div>
 </template>
 
 <style scoped>
-.container {
+#app {
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
@@ -54,57 +81,99 @@ h1 {
   text-align: center;
 }
 
-.input-group {
-  display: flex;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-input {
-  flex: 1;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-input:focus {
-  outline: none;
-  border-color: #42b983;
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #369970;
-}
-
-.users-list {
-  margin-top: 30px;
-}
-
-.users-list h2 {
-  color: #333;
-}
-
-.users-list ul {
+ul {
   list-style: none;
   padding: 0;
 }
 
-.users-list li {
-  padding: 10px;
-  margin: 5px 0;
+.user-item {
+  padding: 0;
+  margin: 8px 0;
   background-color: #f0f0f0;
   border-radius: 4px;
+  overflow: hidden;
+}
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 10;
+  min-width: 120px;
+}
+
+.dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f5f5f5;
+}
+
+.posts-section {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.posts-section h2 {
+  color: #333;
+}
+
+.post-item {
+  padding: 10px;
+  margin: 8px 0;
+  background-color: white;
+  border-left: 3px solid #42b983;
+  border-radius: 2px;
+}
+
+.loading,
+.error,
+.empty {
+  text-align: center;
+  padding: 20px;
+  font-size: 16px;
+}
+
+.error {
+  color: #d32f2f;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+.empty {
+  color: #999;
 }
 </style>
