@@ -9,10 +9,19 @@ const drawer = ref(false)
     <v-app-bar color="primary">
       <v-app-bar-nav-icon @click="drawer = !drawer" style="color: white;"></v-app-bar-nav-icon>
       <v-app-bar-title>Aplicação</v-app-bar-title>
-      <v-spacer></v-spacer>
-      <v-btn variant="text" to="/">Home</v-btn>
-      <v-btn variant="text" to="/leitor">Leitor</v-btn>
     </v-app-bar>
+
+    <!-- Drawer Navigation -->
+    <v-navigation-drawer v-model="drawer">
+      <v-list>
+        <v-list-item to="/" @click="drawer = false">
+          <v-list-item-title>Home</v-list-item-title>
+        </v-list-item>
+        <v-list-item to="/leitor" @click="drawer = false">
+          <v-list-item-title>Leitor</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
     <v-main>
       <router-view />

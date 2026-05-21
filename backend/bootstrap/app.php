@@ -11,8 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(\App\Http\Middleware\Cors::class);
         $middleware->statefulApi();
-        $middleware->append(\App\Http\Middleware\Cors::class);
+        $middleware->validateCsrfTokens(except: [
+            'enviarpdf',
+            'exportar'
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

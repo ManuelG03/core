@@ -9,17 +9,29 @@ class Cors
 {
     public function handle(Request $request, Closure $next)
     {
+        $headers = [
+            'Access-Control-Allow-Origin' => 'http://localhost:5173',
+            'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-CSRF-TOKEN',
+            'Access-Control-Allow-Credentials' => 'true'
+        ];
+
         if ($request->getMethod() === 'OPTIONS') {
-            return response()
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            return response('', 200, $headers);
         }
 
-        return $next($request)
-            ->header('Access-Control-Allow-Origin', '*')
-            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-            ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        $response = $next($request);
+
+        // Apply headers in a way that works for both Illuminate responses and Symfony BinaryFileResponse
+        foreach ($headers as $key => $value) {
+            if (is_object($response) && property_exists($response, 'headers') && is_object($response->headers)) {
+                $response->headers->set($key, $value);
+            } elseif (is_object($response) && method_exists($response, 'header')) {
+                $response->header($key, $value);
+            }
+        }
+
+        return $response;
     }
 }
 
