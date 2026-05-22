@@ -14,11 +14,12 @@ class PdfTextExport implements FromArray, WithHeadings
         $this->rows = $rows;
     }
 
+    // Define os cabeçalhos das colunas para o ficheiro Excel.
     public function headings(): array
     {
         return [
-            'Line Number',
-            'Content',
+            'ITEM',
+            'INFORMAÇÃO',
         ];
     }
 

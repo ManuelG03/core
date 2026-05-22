@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => '__root__',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '1cdad4466308796d8a749e8a99babf5e36533c16',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        '__root__' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '1cdad4466308796d8a749e8a99babf5e36533c16',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'spatie/pdf-to-text' => array(
+            'pretty_version' => '1.55.0',
+            'version' => '1.55.0.0',
+            'reference' => 'c5c6c7fa8aaa34de7eb6cde42b45aec480c8afb6',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spatie/pdf-to-text',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'symfony/process' => array(
+            'pretty_version' => 'v8.0.11',
+            'version' => '8.0.11.0',
+            'reference' => '26d89e459f037d2873300605d0a07e7a8ef84db0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/process',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

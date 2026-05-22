@@ -26,7 +26,7 @@ const enviarPDFbackend = async () => {
 
     const response = await axios.post('http://localhost:8000/enviarpdf', formData);
 
-    //console.log('Resposta do backend:', response.data);
+  console.log('Resposta do backend:', response.data);
     
     if (response.data.text) {
       extractedText.value = response.data.text;
