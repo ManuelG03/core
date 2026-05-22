@@ -3,6 +3,7 @@ FROM php:8.4-cli
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
+    poppler-utils \
     freetds-bin \
     freetds-dev \
     git \
@@ -19,6 +20,7 @@ RUN apt-get update && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
     msodbcsql18 \
     unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
+
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     freetds-dev \

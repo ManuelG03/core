@@ -1,5 +1,6 @@
 {
     "require": {
-        "spatie/pdf-to-text": "^1.55"
+        "spatie/pdf-to-text": "^1.55",
+        "maatwebsite/excel": "^3.1"
     }
 }

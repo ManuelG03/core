@@ -18,7 +18,8 @@ Route::get(('/utilizadores'), [App\Http\Controllers\UtilizadoresController::clas
 // Rota para ir buscar posts de um utilizador específico
 Route::get('/posts/{id}', [App\Http\Controllers\UtilizadoresController::class, 'getUserPosts']);
 
-Route::post('/enviarpdf', [App\Http\Controllers\PDFController::class, 'upload']);
+// Rota para dar upload de PDF para o backend
+Route::post('/enviarpdf', [App\Http\Controllers\PDFController::class, 'upload2']);
 
 Route::post('/exportar', [App\Http\Controllers\PDFController::class, 'export']);
 

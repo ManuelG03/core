@@ -29,7 +29,7 @@ const enviarPDFbackend = async () => {
   console.log('Resposta do backend:', response.data);
     
     if (response.data.text) {
-      extractedText.value = response.data.text;
+      extractedText.value = response.data.info;
       //console.log('Texto extraído:', extractedText.value);
     } else {
       console.error('Nenhum campo text na resposta:', response.data);
