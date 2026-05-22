@@ -10,16 +10,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Route para adicionar utilizadores (sem uso)
 Route::post('/add-user', [AddUser::class, 'add']);
 
-// Rotas para utilizadores
+// Route para obter lista de utilizadores
 Route::get(('/utilizadores'), [App\Http\Controllers\UtilizadoresController::class, 'index']);
 
-// Rota para ir buscar posts de um utilizador específico
+// Route para obter os posts de cada um dos utilizadores
 Route::get('/posts/{id}', [App\Http\Controllers\UtilizadoresController::class, 'getUserPosts']);
 
-// Rota para dar upload de PDF para o backend
-Route::post('/enviarpdf', [App\Http\Controllers\PDFController::class, 'upload2']);
+//Route para enviar o PDF para o backend, e obter o texto extraído
+Route::post('/enviarpdf', [App\Http\Controllers\PDFController::class, 'upload']);
 
+//Route para exportar o texto extraído para um ficheiro Excel
 Route::post('/exportar', [App\Http\Controllers\PDFController::class, 'export']);
 

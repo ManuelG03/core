@@ -11,93 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class PdfController extends Controller
 {
-    // public function upload(Request $request)
-    // {
-    //     if ($request->hasFile('pdf')) {
-    //         $file = $request->file('pdf');
-
-    //         $request->validate([
-    //             'pdf' => 'required|mimes:pdf|max:10240', // Apenas ficheiros PDF, máximo 10MB
-    //         ]);
-
-    //         // Extrair texto do ficheiro
-    //         try {
-    //             $parser = new Parser();
-    //              $pdf = $parser->parseFile($file->getPathname());
-    //             $text = $pdf->getText();
-               
-
-    //             $info = $pdf->getPages()[0]->getDataTm();
-
-    //             $entidade = $info[3][1] ?? 'VAZIO';
-    //             $morada = ($info[6][1] ?? '') . ' ' . ($info[7][1] ?? '') . ' ' . ($info[8][1] ?? '');
-    //             $ss = $info[10][1] ?? 'VAZIO';
-    //             $NIF = $info[18][1] ?? 'VAZIO';
-    //             $estabelecimento = $info[22][1] ?? 'VAZIO';
-    //             $taxa = $info[19][1] ?? 'VAZIO';
-    //             $anomes = $info[23][1] ?? 'VAZIO';
-    //             $dataentrega = $info[20][1] ?? 'VAZIO';
-    //             $totalr = $info[24][1] ?? 'VAZIO';
-    //             $totalc = $info[21][1] ?? 'VAZIO';
-
-    //             $rows = [
-    //                 ['Entidade', $entidade],
-    //                 ['Morada', $morada],
-    //                 ['SS', $ss],
-    //                 ['NIF', $NIF],
-    //                 ['Estabelecimento', $estabelecimento],
-    //                 ['Taxa', $taxa],
-    //                 ['Ano/Mês', $anomes],
-    //                 ['Data Entrega', $dataentrega],
-    //                 ['Total R', $totalr],
-    //                 ['Total C', $totalc],
-    //             ];
-                
-    //             foreach ($info as $key => $value) {
-    //                 Log::info("PDF Info", [
-    //                       'key' => $key,
-    //                      'value' => $value,
-    //                         ]);
-    //                     }
-
-    //             return response()->json([
-    //                 'message' => 'Ficheiro PROCESSADO com sucesso!',
-    //                 'text' => $text,
-    //                 'info' => $info,
-    //                 'entidade' => $entidade,
-    //                 'morada' => $morada,
-    //                 'ss' => $ss,
-    //                 'NIF' => $NIF,
-    //                 'estabelecimento' => $estabelecimento,
-    //                 'taxa' => $taxa,
-    //                 'anomes' => $anomes,
-    //                 'dataentrega' => $dataentrega,
-    //                 'totalr' => $totalr,
-    //                 'totalc' => $totalc,
-    //                 'rows' => $rows
-    //             ], 200);
-                                
-    //             $text = trim($text);
-                
-    //             if ($request->input('export') === 'true' || $request->input('export') === '1') {
-    //                 return $this->exportToExcel($text, $file->getClientOriginalName());
-    //             }
-
-    //             return response()->json([
-    //                 'message' => 'Ficheiro processado com sucesso!',
-    //                 'text' => $text
-    //             ], 200);
-    //         } catch (\Exception $e) {
-    //             return response()->json([
-    //                 'message' => 'Erro ao processar PDF: ' . $e->getMessage()
-    //             ], 400);
-    //         }
-    //     } else {
-    //         return response()->json(['message' => 'Nenhum ficheiro enviado.'], 400);
-    //     }
-    // }
-
-    public function upload2(Request $request)
+    public function upload(Request $request)
 {
     if ($request->hasFile('pdf')) {
 
@@ -117,18 +31,6 @@ class PdfController extends Controller
 
             $result = [];
 
-            // foreach ($lines as $line) {
-
-            //     if (strpos($line, ':') !== false) {
-
-            //         list($key, $value) = explode(':', $line, 2);
-
-            //         $result[] = [
-            //             'key' => trim($key),
-            //             'value' => trim($value),
-            //         ];
-            //     }
-            // }
 
             $start = false;
            foreach ($lines as $line) {
@@ -180,12 +82,6 @@ class PdfController extends Controller
                     'message' => 'Erro: Nenhum texto para exportar.'
                 ], 400);
             }
-
-            // Preparar linhas para exportação
-            //$lines = explode("\n", $text);
-            //$rows = array_map(function ($line, $index) {
-             //   return [$index + 1, $line];
-            //}, $lines, array_keys($lines));
 
             if (is_array($text)) {
             $text = implode("\n", $text);

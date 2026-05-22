@@ -17,7 +17,6 @@ class PdfTextExport implements FromArray, WithHeadings, ShouldAutoSize, WithStyl
         $this->rows = $rows;
     }
 
-    // Define os cabeçalhos das colunas para o ficheiro Excel.
     public function headings(): array
     {
         return [
@@ -41,7 +40,7 @@ class PdfTextExport implements FromArray, WithHeadings, ShouldAutoSize, WithStyl
         $sheet->getStyle('A1:F1')->getFont()->setBold(true);
 
          return [
-            'A:C' => [
+            'A:G' => [
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                     'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,

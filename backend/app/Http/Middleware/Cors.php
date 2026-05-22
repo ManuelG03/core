@@ -22,7 +22,6 @@ class Cors
 
         $response = $next($request);
 
-        // Apply headers in a way that works for both Illuminate responses and Symfony BinaryFileResponse
         foreach ($headers as $key => $value) {
             if (is_object($response) && property_exists($response, 'headers') && is_object($response->headers)) {
                 $response->headers->set($key, $value);

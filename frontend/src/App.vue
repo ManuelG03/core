@@ -10,8 +10,6 @@ const drawer = ref(false)
       <v-app-bar-nav-icon @click="drawer = !drawer" style="color: white;"></v-app-bar-nav-icon>
       <v-app-bar-title>Aplicação</v-app-bar-title>
     </v-app-bar>
-
-    <!-- Drawer Navigation -->
     <v-navigation-drawer v-model="drawer">
       <v-list>
         <v-list-item to="/" @click="drawer = false">
