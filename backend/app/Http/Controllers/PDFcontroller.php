@@ -33,24 +33,31 @@ class PdfController extends Controller
 
 
             $start = false;
-           foreach ($lines as $line) {
+          foreach ($lines as $line) {
 
-            $line = trim($line);
+    $line = trim($line);
 
-             if (!$start) {
-                 if (strpos($line, 'de Seg. Social') !== false) {
-                     $start = true;
-                     }
-                 continue;
-                 }
-                  if ($line === '') {
-                     continue;
-                }
-                  if (strpos($line, 'Processado por Computador') !== false) {
-                break;
-                }
+    if ($line === '') {
+        continue;
+    }
 
-                 $result[] = $line;
+    // start capturing
+    if (!$start) {
+
+        if (strpos($line, 'de Seg. Social') !== false) {
+            $start = true;
+        }
+
+        continue;
+    }
+
+    // stop current section but continue scanning
+    if (strpos($line, 'Processado por Computador') !== false) {
+        $start = false;
+        continue;
+    }
+
+    $result[] = $line;
 }
             // Exporta para Excel
             return response()->json([
