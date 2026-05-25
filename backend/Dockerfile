@@ -3,7 +3,10 @@ FROM php:8.4-cli
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
+    tesseract-ocr \
+    tesseract-ocr-por \
     poppler-utils \
+    qpdf \
     freetds-bin \
     freetds-dev \
     git \

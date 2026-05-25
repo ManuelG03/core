@@ -26,14 +26,29 @@ class PdfController extends Controller
                 ->setPdf($file->getPathname())
                 ->setOptions(['layout'])
                 ->text();
+                LOG::info('Texto extraído: ' . substr($texto, 0, 200) . '...'); // Log dos primeiros 200 caracteres
 
-            $lines = explode("\n", $texto);
 
-            $result = [];
+        $caracteresControlo = preg_match_all('/[\x07-\x0D\x0E-\x1F]/', $texto);
+        $total = mb_strlen(trim($texto));
+        $ratioControlo = $total > 0 ? $caracteresControlo / $total : 0;
 
+        \Log::info("Ratio caracteres de controlo: {$ratioControlo}");
+
+        if (
+        empty(trim($texto)) || $ratioControlo > 0.05  // MAIS DE 5% ILEGIVEL
+        ) {
+        \Log::warning('Texto ilegível, a usar OCR para: ' . $file->getPathname());
+        $texto = $this->extrairTextoComOCR($file->getPathname());
+        }
+
+
+    $lines = explode("\n", $texto);
+    $result = [];
+ 
 
             $start = false;
-          foreach ($lines as $line) {
+    foreach ($lines as $line) {
 
     $line = trim($line);
 
@@ -56,7 +71,7 @@ class PdfController extends Controller
         $start = false;
         continue;
     }
-
+    Log::info('Linha capturada: ' . $line);
     $result[] = $line;
 }
             // Exporta para Excel
@@ -132,5 +147,52 @@ class PdfController extends Controller
         }
     }
 
+   private function extrairTextoComOCR(string $pdfPath): string
+{
+    \Log::info('Iniciando OCR para: ' . $pdfPath);
+    
+    // Verificar se o ficheiro existe
+    if (!file_exists($pdfPath)) {
+        \Log::error('OCR: Ficheiro não existe: ' . $pdfPath);
+        return '';
+    }
 
+    $prefix = '/tmp/pagina_' . uniqid();
+    $texto  = '';
+
+    // Converter PDF em imagens
+    $cmd = "pdftoppm -r 300 {$pdfPath} {$prefix} 2>&1";
+    $res = shell_exec($cmd);
+    \Log::info('pdftoppm resultado: ' . $res);
+
+    $paginas = glob("{$prefix}*.ppm");
+    \Log::info('Páginas encontradas: ' . count($paginas));
+
+    if (empty($paginas)) {
+        \Log::error('OCR: Nenhuma imagem gerada');
+        return '';
+    }
+
+    foreach ($paginas as $pagina) {
+        $output = '/tmp/resultado_' . uniqid();
+
+        $cmd2 = "tesseract {$pagina} {$output} -l por --psm 6";
+        $res2 = shell_exec($cmd2);
+        \Log::info('Tesseract resultado (' . basename($pagina) . '): ' . $res2);
+
+        if (file_exists("{$output}.txt")) {
+            $conteudo = file_get_contents("{$output}.txt");
+            \Log::info('Texto extraído (primeiros 100 chars): ' . substr($conteudo, 0, 100));
+            $texto .= $conteudo;
+            unlink("{$output}.txt");
+        } else {
+            \Log::error('Output não criado: ' . $output . '.txt');
+        }
+
+        unlink($pagina);
+    }
+
+    \Log::info('OCR concluído. Total chars: ' . strlen($texto));
+    return $texto;
+}
 }
