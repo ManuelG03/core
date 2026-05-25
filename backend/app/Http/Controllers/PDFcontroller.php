@@ -26,8 +26,10 @@ class PdfController extends Controller
                 ->setPdf($file->getPathname())
                 ->setOptions(['layout'])
                 ->text();
-                LOG::info('Texto extraído: ' . substr($texto, 0, 200) . '...'); // Log dos primeiros 200 caracteres
+                    
+                LOG::info('Texto extraído: ' . substr($texto, 0, 500) . '...'); // Log dos primeiros 200 caracteres
 
+        
 
         $caracteresControlo = preg_match_all('/[\x07-\x0D\x0E-\x1F]/', $texto);
         $total = mb_strlen(trim($texto));
@@ -42,9 +44,9 @@ class PdfController extends Controller
         $texto = $this->extrairTextoComOCR($file->getPathname());
         }
 
-
-    $lines = explode("\n", $texto);
-    $result = [];
+        $texto = str_replace('|', '', $texto); // Limpar "|" que possam aparecer na extração
+        $lines = explode("\n", $texto);
+        $result = [];
  
 
             $start = false;
@@ -71,7 +73,7 @@ class PdfController extends Controller
         $start = false;
         continue;
     }
-    Log::info('Linha capturada: ' . $line);
+    //Log::info('Linha capturada: ' . $line);
     $result[] = $line;
 }
             // Exporta para Excel
@@ -110,19 +112,34 @@ class PdfController extends Controller
 }
             $lines = explode("\n", $text);
             $rows = [];
+
+            //--------------------------------------------------------
+
             foreach ($lines as $line) {
+    $line = trim($line);
+    if ($line === '') continue;
 
-                $line = trim($line);
-                if ($line === '') {
-                    continue;
-                }
-            $cols = preg_split('/\s{2,}/', $line);
+    $pattern = '/^(\d+)\s+([A-ZÀÁÂÃÄÉÊÍÓÔÕÚÇ\s]+?)\s+(\d{4}\/\d{2})\s+([A-Z0-9])\s+([\d.]+)\s+([\d.]+)$/';
 
-            $cols = array_pad($cols, 6, '');
+    if (preg_match($pattern, $line, $matches)) {
+        $cols = [
+            $matches[1],
+            trim($matches[2]),
+            $matches[3],
+            $matches[4],
+            $matches[5],
+            $matches[6],
+        ];
+    } else {
+        $cols = preg_split('/\s{2,}/', $line);
+        $cols = array_pad($cols, 6, '');
+    }
 
-            $rows[] = $cols;
+    $rows[] = $cols;
+}
 
-            }
+            // -------------------------------------------------------
+            
 
             // Exportar como Excel
             $response = Excel::download(
