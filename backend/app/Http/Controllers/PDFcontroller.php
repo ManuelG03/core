@@ -98,6 +98,7 @@ class PdfController extends Controller
     public function export(Request $request)
     {
         try {
+
             $text = $request->input('text', '');
 
             if (empty($text)) {
@@ -140,8 +141,14 @@ class PdfController extends Controller
 
             // -------------------------------------------------------
             
-            //VERIFICAR
-            // Exportar como Excel
+            // Caso o utilizador queira exportar como JSON.
+
+             if ($request->input('formato') === 'json') {
+             return response()->json($rows);
+             }
+            
+             // Caso o utilizador queira exportar como Excel.
+             
             $response = Excel::download(
                 new PdfTextExport($rows),
                 'extracto_de_remuneracoes.xlsx'

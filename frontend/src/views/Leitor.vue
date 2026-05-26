@@ -44,25 +44,40 @@ const enviarPDFbackend = async () => {
   }
 };
 
-  // Função para exportar o texto extraído para um ficheiro Excel.
+  // Função para exportar o texto extraído.
 
-const exportarParaExcel = async () => {
+const exportar = async (formato: string = 'excel') => {
   if (!extractedText.value) {
     alert('Nenhum texto para exportar');
     return;
   }
 
   try {
-    const response = await axios.post('http://localhost:8000/exportar', { text: extractedText.value }, { responseType: 'blob' });
+   
+    const response = await axios.post('http://localhost:8000/exportar',
+    { text: extractedText.value,  formato },
+    { responseType: formato === 'json' ? 'json' : 'blob' }
+   );
 
-    // Criar um link para download do ficheiro Excel que foi gerado pelo backend.
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'extracto_remuneraçoes.xlsx');
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode?.removeChild(link);
+    console.log('OPÇÃO DE EXPORTAÇÃO:', formato);
+    if (formato === 'json') {
+      const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'extracto_remuneraçoes.json');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } else {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'extracto_remuneraçoes.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    }
   } catch (error: any) {
 
     if (error.response?.data instanceof Blob) {
@@ -117,15 +132,16 @@ const exportarParaExcel = async () => {
             ></v-textarea>
 
             <div v-if="extractedText" style="margin-top: 25px;">
-              <v-btn color="success" @click="exportarParaExcel">Exportar para Excel</v-btn>
+              <v-btn color="success" @click="exportar('excel')">Exportar para Excel</v-btn>
             </div>
 
             <div v-if="extractedText" style="margin-top: 25px;">
-              <v-btn color="deep-purple-lighten-1" @click="" >Gerar ficheiro JSON</v-btn>
+              <v-btn color="deep-purple-lighten-1" @click="exportar('json')" >Gerar ficheiro JSON</v-btn>
             </div>
 
         </v-container>
     </v-main>
   </v-app>
 </template>
+
 
