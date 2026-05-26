@@ -79,6 +79,8 @@ const exportarParaExcel = async () => {
   }
 };
 
+
+
 </script>
 
 // Página para inserir ficheiros
@@ -119,7 +121,7 @@ const exportarParaExcel = async () => {
             </div>
 
             <div v-if="extractedText" style="margin-top: 25px;">
-              <v-btn color="deep-purple-lighten-1">Gerar ficheiro JSON</v-btn>
+              <v-btn color="deep-purple-lighten-1" @click="" >Gerar ficheiro JSON</v-btn>
             </div>
 
         </v-container>
