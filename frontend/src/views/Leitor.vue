@@ -117,6 +117,11 @@ const exportarParaExcel = async () => {
             <div v-if="extractedText" style="margin-top: 25px;">
               <v-btn color="success" @click="exportarParaExcel">Exportar para Excel</v-btn>
             </div>
+
+            <div v-if="extractedText" style="margin-top: 25px;">
+              <v-btn color="deep-purple-lighten-1">Gerar ficheiro JSON</v-btn>
+            </div>
+
         </v-container>
     </v-main>
   </v-app>

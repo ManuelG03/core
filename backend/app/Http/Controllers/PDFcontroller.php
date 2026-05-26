@@ -27,7 +27,7 @@ class PdfController extends Controller
                 ->setOptions(['layout'])
                 ->text();
                     
-                LOG::info('Texto extraído: ' . substr($texto, 0, 500) . '...'); // Log dos primeiros 200 caracteres
+               // LOG::info('Texto extraído: ' . substr($texto, 0, 500) . '...'); // Log dos primeiros 200 caracteres
 
         
 
@@ -50,32 +50,31 @@ class PdfController extends Controller
  
 
             $start = false;
-    foreach ($lines as $line) {
+        foreach ($lines as $line) {
 
-    $line = trim($line);
+        $line = trim($line);
 
-    if ($line === '') {
-        continue;
-    }
-
-    // start capturing
-    if (!$start) {
-
-        if (strpos($line, 'de Seg. Social') !== false) {
-            $start = true;
+        if ($line === '') {
+            continue;
         }
 
-        continue;
-    }
+        // start capturing
+        if (!$start) {
 
-    // stop current section but continue scanning
-    if (strpos($line, 'Processado por Computador') !== false) {
-        $start = false;
-        continue;
+            if (strpos($line, 'de Seg. Social') !== false) {
+                $start = true;
+            }
+
+            continue;
+        }
+
+        if (strpos($line, 'Processado por Computador') !== false) {
+            $start = false;
+            continue;
+        }
+        //Log::info('Linha capturada: ' . $line);
+        $result[] = $line;
     }
-    //Log::info('Linha capturada: ' . $line);
-    $result[] = $line;
-}
             // Exporta para Excel
             return response()->json([
                 'message' => 'Ficheiro PROCESSADO com sucesso!',
@@ -109,38 +108,39 @@ class PdfController extends Controller
 
             if (is_array($text)) {
             $text = implode("\n", $text);
-}
+            }
+
             $lines = explode("\n", $text);
             $rows = [];
 
             //--------------------------------------------------------
 
             foreach ($lines as $line) {
-    $line = trim($line);
-    if ($line === '') continue;
+                 $line = trim($line);
+                if ($line === '') continue;
 
-    $pattern = '/^(\d+)\s+([A-ZÀÁÂÃÄÉÊÍÓÔÕÚÇ\s]+?)\s+(\d{4}\/\d{2})\s+([A-Z0-9])\s+([\d.]+)\s+([\d.]+)$/';
+                 $pattern = '/^(\d+)\s+([A-ZÀÁÂÃÄÉÊÍÓÔÕÚÇ\s]+?)\s+(\d{4}\/\d{2})\s+([A-Z0-9])\s+([\d.]+)\s+([\d.]+)$/';
 
-    if (preg_match($pattern, $line, $matches)) {
-        $cols = [
-            $matches[1],
-            trim($matches[2]),
-            $matches[3],
-            $matches[4],
-            $matches[5],
-            $matches[6],
-        ];
-    } else {
-        $cols = preg_split('/\s{2,}/', $line);
-        $cols = array_pad($cols, 6, '');
-    }
+                if (preg_match($pattern, $line, $matches)) {
+                        $cols = [
+                            $matches[1],
+                            trim($matches[2]),
+                            $matches[3],
+                            $matches[4],
+                            $matches[5],
+                            $matches[6],
+                        ];
+                    } else {
+                        $cols = preg_split('/\s{2,}/', $line);
+                        $cols = array_pad($cols, 6, '');
+                    }
 
-    $rows[] = $cols;
-}
+                    $rows[] = $cols;
+                }
 
             // -------------------------------------------------------
             
-
+            //VERIFICAR
             // Exportar como Excel
             $response = Excel::download(
                 new PdfTextExport($rows),
@@ -180,16 +180,17 @@ class PdfController extends Controller
     // Converter PDF em imagens
     $cmd = "pdftoppm -r 300 {$pdfPath} {$prefix} 2>&1";
     $res = shell_exec($cmd);
-    \Log::info('pdftoppm resultado: ' . $res);
+   // \Log::info('pdftoppm resultado: ' . $res);
 
     $paginas = glob("{$prefix}*.ppm");
-    \Log::info('Páginas encontradas: ' . count($paginas));
+    //\Log::info('Páginas encontradas: ' . count($paginas));
 
     if (empty($paginas)) {
         \Log::error('OCR: Nenhuma imagem gerada');
         return '';
     }
 
+    // Processar cada página com Tesseract
     foreach ($paginas as $pagina) {
         $output = '/tmp/resultado_' . uniqid();
 
