@@ -5,6 +5,14 @@ import axios from 'axios';
 const selectedFile = ref<any>(null);
 const extractedText = ref('');
 const isLoading = ref(false);
+const erro = ref('');
+
+const mostrarErro = (mensagem: string) => {
+  erro.value = mensagem;
+  setTimeout(() => {
+    erro.value = '';
+  }, 5000); // 5 segundos
+};
 
 // Função para enviar o ficheiro PDF para o backend
 const enviarPDFbackend = async () => {
@@ -15,7 +23,7 @@ const enviarPDFbackend = async () => {
   }
   
   if (!file) {
-    alert('Por favor, selecione um ficheiro PDF antes de enviar.');
+    mostrarErro('Por favor, selecione um ficheiro PDF antes de enviar.');
     return;
   }
 
@@ -33,12 +41,12 @@ const enviarPDFbackend = async () => {
       //console.log('Texto extraído:', extractedText.value);
     } else {
       console.error('Nenhum campo text na resposta:', response.data);
-      alert('Erro: Nenhum texto foi extraído');
+      mostrarErro('Erro: Nenhum texto para extrair.');
     }
   } catch (error: any) {
     console.error('Erro ao enviar ficheiro:', error);
     console.error('Resposta de erro:', error.response?.data);
-    alert('Erro ao processar ficheiro PDF: ' + (error.response?.data?.message || error.message));
+    mostrarErro('Erro ao processar ficheiro PDF: ' + (error.response?.data?.message || error.message));
   } finally {
     isLoading.value = false;
   }
@@ -48,7 +56,7 @@ const enviarPDFbackend = async () => {
 
 const exportar = async (formato: string = 'excel') => {
   if (!extractedText.value) {
-    alert('Nenhum texto para exportar');
+    mostrarErro('Nenhum texto para exportar');
     return;
   }
 
@@ -61,19 +69,29 @@ const exportar = async (formato: string = 'excel') => {
 
     console.log('OPÇÃO DE EXPORTAÇÃO:', formato);
     if (formato === 'json') {
-      const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+      const dados = response.data.map((row: any[]) => ({
+        niss:       row[0],
+        nome:      row[1],
+        ano_mes:   row[2],
+        nat_remun: row[3],
+        dias:      row[4],
+        valor:     row[5],
+      }));
+
+      const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'extracto_remuneraçoes.json');
+      link.setAttribute('download', 'extracto_remuneracoes.json');
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
-    } else {
+    }
+    else {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'extracto_remuneraçoes.xlsx');
+      link.setAttribute('download', 'extracto_remuneracoes.xlsx');
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
@@ -84,12 +102,12 @@ const exportar = async (formato: string = 'excel') => {
       try {
         const text = await error.response.data.text();
         console.error('Erro do servidor:', text);
-        alert('Erro ao exportar: ' + text);
+        mostrarErro('Erro ao exportar: ' + text);
       } catch (e) {
-        alert('Erro ao exportar: ver consola para detalhes');
+        mostrarErro('Erro ao exportar: ver consola para detalhes');
       }
     } else {
-      alert('Erro ao exportar: ' + (error.response?.data?.message || error.message));
+      mostrarErro('Erro ao exportar: ' + (error.response?.data?.message || error.message));
     }
   }
 };
@@ -103,6 +121,15 @@ const exportar = async (formato: string = 'excel') => {
   <v-app>
     <v-main>
         <v-container>
+          <v-alert
+            v-if="erro"
+            type="error"
+            dismissible
+            @click:close="erro = ''"
+            style="margin-bottom: 1rem;"
+          >
+            {{ erro }}
+          </v-alert>
             <h1>Leitor de Ficheiros PDF</h1>
             <p>Aqui poderá carregar e ler ficheiros PDF.</p>
 

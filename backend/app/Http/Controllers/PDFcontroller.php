@@ -47,7 +47,17 @@ class PdfController extends Controller
         $texto = str_replace('|', '', $texto); // Limpar "|" que possam aparecer na extração
         $lines = explode("\n", $texto);
         $result = [];
- 
+
+        // Verificar se a primeira linha contém "Nº Identificação de Seg. Social" para garantir que o formato é o esperado
+        if (count($lines) > 0 && (
+            strpos($lines[0], 'EXTRACTO DA DECLARAÇÃO DE REMUNERAÇÕES') === false &&
+            strpos($lines[0], 'SEGURANÇA SOCIAL') === false
+        )) {            \Log::warning('Formato inesperado: primeira linha não contém o cabeçalho esperado');
+            return response()->json([
+                'message' => 'O documento enviado não corresponde a um extracto de remunerações válido.',
+                'text' => $texto,
+            ], 400);
+        }
 
             $start = false;
         foreach ($lines as $line) {
@@ -148,17 +158,11 @@ class PdfController extends Controller
              }
             
              // Caso o utilizador queira exportar como Excel.
-             
+
             $response = Excel::download(
                 new PdfTextExport($rows),
                 'extracto_de_remuneracoes.xlsx'
             );
-
-            // Garantir headers CORS na resposta de download (BinaryFileResponse usa headers->set)
-            $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:5173');
-            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-TOKEN');
-            $response->headers->set('Access-Control-Allow-Credentials', 'true');
 
             return $response;
         } catch (\Exception $e) {
